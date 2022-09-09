@@ -1,7 +1,21 @@
 import * as THREE from 'three';
 import gsap from 'gsap'
-
+import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls'
 console.log(gsap)
+
+//Cursor
+
+const cursor = {
+    x: 0,
+    y: 0
+}
+
+window.addEventListener('mousemove', (event) => {
+    cursor.x = event.clientX / sizes.width -0.5
+    cursor.y = -(event.clientY / sizes.width -0.5) 
+
+    console.log(cursor.x )
+})
 
 // Scene
 const scene = new THREE.Scene()
@@ -69,30 +83,38 @@ camera.lookAt(group.position)
 // Canvas
 const canvas = document.querySelector('canvas.webgl')
 
-// ...
-
+// Controls
+const controls = new OrbitControls(camera, canvas)
+controls.enableDamping = true;
 // Renderer
 const renderer = new THREE.WebGLRenderer({
     canvas: canvas
 })
 renderer.setSize(sizes.width, sizes.height)
+
+controls.update()
 renderer.render(scene, camera)
 
 
 // Animate
 
 let time = Date.now();
-gsap.to(group.position, {duration: 1, x: 2, delay: 1})
-gsap.to(group.position, {duration: 1, x: -2, delay: 3})
  const tick = () =>
  {
     const currentTime = Date.now()
     const deltaTime = currentTime - time
     time = currentTime
 
-    group.rotation.y += 0.001 * deltaTime;
+    //group.rotation.y += 0.001 * deltaTime;
+
+    // Update camera
+    //camera.position.x = Math.sin(cursor.x * Math.PI *2) * 3
+    //camera.position.z = Math.cos(cursor.x * Math.PI *2) * 3 
+    //camera.position.y = cursor.y * 5
+
+    //camera.lookAt(group.position)
+
     renderer.render(scene, camera)
- 
     window.requestAnimationFrame(tick)
  }
  
