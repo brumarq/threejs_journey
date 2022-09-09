@@ -1,4 +1,7 @@
 import * as THREE from 'three';
+import gsap from 'gsap'
+
+console.log(gsap)
 
 // Scene
 const scene = new THREE.Scene()
@@ -74,3 +77,23 @@ const renderer = new THREE.WebGLRenderer({
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.render(scene, camera)
+
+
+// Animate
+
+let time = Date.now();
+gsap.to(group.position, {duration: 1, x: 2, delay: 1})
+gsap.to(group.position, {duration: 1, x: -2, delay: 3})
+ const tick = () =>
+ {
+    const currentTime = Date.now()
+    const deltaTime = currentTime - time
+    time = currentTime
+
+    group.rotation.y += 0.001 * deltaTime;
+    renderer.render(scene, camera)
+ 
+    window.requestAnimationFrame(tick)
+ }
+ 
+ tick()
