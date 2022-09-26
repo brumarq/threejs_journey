@@ -9,33 +9,6 @@ import * as dat from "dat.gui";
 const gui = new dat.GUI();
 
 /**
- * Textures
- */
-
-const textureLoader = new THREE.TextureLoader();
-
-const gradient = textureLoader.load("textures/gradients/3.jpg");
-const matcap = textureLoader.load("textures/matcaps/8.png");
-
-const colorDoor = textureLoader.load("textures/door/color.jpg");
-const alphaDoor = textureLoader.load("textures/door/alpha.jpg");
-const heightDoor = textureLoader.load("textures/door/height.jpg");
-const normalDoor = textureLoader.load("textures/door/normal.jpg");
-const metalnessDoor = textureLoader.load("textures/door/metalness.jpg");
-const roughnessDoor = textureLoader.load("textures/door/roughness.jpg");
-const ambientOcclusionDoor = textureLoader.load(
-    "textures/door/ambientOcclusion.jpg"
-);
-
-const environmentMapTexture = new THREE.CubeTextureLoader().load([
-    "textures/environmentMaps/0/px.jpg",
-    "textures/environmentMaps/0/nx.jpg",
-    "textures/environmentMaps/0/py.jpg",
-    "textures/environmentMaps/0/ny.jpg",
-    "textures/environmentMaps/0/pz.jpg",
-    "textures/environmentMaps/0/nz.jpg",
-]);
-/**
  * Base
  */
 // Canvas
@@ -48,31 +21,10 @@ const scene = new THREE.Scene();
  * Object
  */
 
-/*const material = new THREE.MeshBasicMaterial({
-    map: colorDoor,
-});*/
-
-/*const material = new THREE.MeshNormalMaterial({
-    map: colorDoor,
-});*/
-
-/*const material = new THREE.MeshMatcapMaterial();
-material.matcap = matcap;*/
-
-/*const material = new THREE.MeshDepthMaterial();*/
-
 const material = new THREE.MeshStandardMaterial();
 material.metalness = 0.7;
 material.roughness = 0.2;
-// material.map = colorDoor;
-// material.aoMap = ambientOcclusionDoor;
-// material.displacementMap = heightDoor;
-// material.displacementScale = 0.1;
-// material.metalnessMap = metalnessDoor;
-// material.roughnessMap = roughnessDoor;
-// material.normalMap = normalDoor;
 
-material.envMap = environmentMapTexture;
 const sphere = new THREE.Mesh(
     new THREE.SphereBufferGeometry(0.5, 16, 16),
     material
