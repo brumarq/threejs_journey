@@ -1,69 +1,77 @@
 import "./style.css";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import * as dat from "dat.gui";
-
-/**
- * Debug
- */
-const gui = new dat.GUI();
-
+import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
+import * as dat from "lil-gui";
+import typefaceFont from "three/examples/fonts/helvetiker_regular.typeface.json";
+import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 /**
  * Base
  */
+// Debug
+const gui = new dat.GUI();
+
 // Canvas
 const canvas = document.querySelector("canvas.webgl");
 
 // Scene
 const scene = new THREE.Scene();
 
+// Axes helper
+const axesHelper = new THREE.AxesHelper();
+scene.add(axesHelper);
+
+/**
+ * Textures
+ */
+const textureLoader = new THREE.TextureLoader();
+const matcapTexture = textureLoader.load("/textures/matcaps/4.png");
+
+/**
+ * Fonts
+ */
+const fontLoader = new FontLoader();
+
+fontLoader.load("/fonts/helvetiker_regular.typeface.json", (font) => {
+    const textGeometry = new TextGeometry("Hello Three.js", {
+        font: font,
+        size: 0.5,
+        height: 0.2,
+        curveSegments: 20,
+        bevelEnabled: true,
+        bevelThickness: 0.03,
+        bevelSize: 0.02,
+        bevelOffset: 0,
+        bevelSegments: 5,
+    });
+    const material = new THREE.MeshMatcapMaterial({
+        matcap: matcapTexture,
+    });
+    const text = new THREE.Mesh(textGeometry, material);
+    scene.add(text);
+
+    textGeometry.center();
+
+    const donutGeometry = new THREE.TorusGeometry(0.3, 0.2, 20, 45);
+
+    for (let i = 0; i < 100; i++) {
+        const donut = new THREE.Mesh(donutGeometry, material);
+        scene.add(donut);
+
+        donut.position.x = (Math.random() - 0.5) * 10;
+        donut.position.y = (Math.random() - 0.5) * 10;
+        donut.position.z = (Math.random() - 0.5) * 10;
+    }
+});
 /**
  * Object
  */
-
-const material = new THREE.MeshStandardMaterial();
-material.metalness = 0.7;
-material.roughness = 0.2;
-
-const sphere = new THREE.Mesh(
-    new THREE.SphereBufferGeometry(0.5, 16, 16),
-    material
+const cube = new THREE.Mesh(
+    new THREE.BoxGeometry(1, 1, 1),
+    new THREE.MeshBasicMaterial()
 );
 
-sphere.position.x = 1.5;
-
-const plane = new THREE.Mesh(
-    new THREE.PlaneBufferGeometry(1, 1, 100, 100),
-    material
-);
-
-plane.geometry.setAttribute(
-    "uv2",
-    new THREE.BufferAttribute(plane.geometry.attributes.uv.array, 2)
-);
-
-const torus = new THREE.Mesh(
-    new THREE.TorusBufferGeometry(0.3, 0.2, 16, 32),
-    material
-);
-
-torus.position.x = -1.5;
-scene.add(sphere, plane, torus);
-
-gui.add(material, "metalness").min(0).max(1).step(0.0001);
-gui.add(material, "roughness").min(0).max(1).step(0.0001);
-
-/**
- * Lights
- */
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-scene.add(ambientLight);
-
-const pointLight = new THREE.PointLight(0xffffff, 0.5);
-pointLight.position.x = 2;
-pointLight.position.y = 3;
-pointLight.position.z = 4;
-scene.add(pointLight);
+//scene.add(cube);
 
 /**
  * Sizes
@@ -88,28 +96,6 @@ window.addEventListener("resize", () => {
 });
 
 /**
- * Fullscreen
- */
-window.addEventListener("dblclick", () => {
-    const fullscreenElement =
-        document.fullscreenElement || document.webkitFullscreenElement;
-
-    if (!fullscreenElement) {
-        if (canvas.requestFullscreen) {
-            canvas.requestFullscreen();
-        } else if (canvas.webkitRequestFullscreen) {
-            canvas.webkitRequestFullscreen();
-        }
-    } else {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        } else if (document.webkitExitFullscreen) {
-            document.webkitExitFullscreen();
-        }
-    }
-});
-
-/**
  * Camera
  */
 // Base camera
@@ -119,7 +105,9 @@ const camera = new THREE.PerspectiveCamera(
     0.1,
     100
 );
-camera.position.z = 3;
+camera.position.x = 1;
+camera.position.y = 1;
+camera.position.z = 2;
 scene.add(camera);
 
 // Controls
@@ -142,15 +130,6 @@ const clock = new THREE.Clock();
 
 const tick = () => {
     const elapsedTime = clock.getElapsedTime();
-
-    // Update objects position
-    sphere.rotation.y = 0.1 * elapsedTime;
-    torus.rotation.y = 0.1 * elapsedTime;
-    //plane.rotation.y = 0.1 * elapsedTime;
-
-    sphere.rotation.x = 0.15 * elapsedTime;
-    torus.rotation.x = 0.15 * elapsedTime;
-    //plane.rotation.x = 0.15 * elapsedTime;
 
     // Update controls
     controls.update();
