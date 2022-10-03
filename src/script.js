@@ -1,121 +1,190 @@
-import * as THREE from 'three';
-import gsap from 'gsap'
-import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls'
-console.log(gsap)
+import "./style.css";
+import * as THREE from "three";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import * as dat from "lil-gui";
+import { RectAreaLightHelper } from "three/examples/jsm/helpers/RectAreaLightHelper.js";
 
-//Cursor
-
-const cursor = {
-    x: 0,
-    y: 0
-}
-
-window.addEventListener('mousemove', (event) => {
-    cursor.x = event.clientX / sizes.width -0.5
-    cursor.y = -(event.clientY / sizes.width -0.5) 
-
-    console.log(cursor.x )
-})
-
-// Scene
-const scene = new THREE.Scene()
-
-// Object
-
-const group = new THREE.Group();
-
-const cube1 = new THREE.Mesh(
-    new THREE.BoxGeometry(1,1,1),
-    new THREE.MeshBasicMaterial({color: '#32a852'})
-)
-
-const cube2 = new THREE.Mesh(
-    new THREE.BoxGeometry(1,1,1),
-    new THREE.MeshBasicMaterial({color: '#88a690'})
-)
-cube2.position.set(0.5, 1, 0,5)
-
-const cube3 = new THREE.Mesh(
-    new THREE.BoxGeometry(1,1,1),
-    new THREE.MeshBasicMaterial({color: '#9788a6'})
-)
-cube3.position.set(-0.5, 1, 0,5)
-
-
-group.add(cube1, cube2, cube3);
-
-const geometry = new THREE.BoxGeometry(1, 1, 1)
-const material = new THREE.MeshBasicMaterial({ color: 0xff0000 })
-const mesh = new THREE.Mesh(geometry, material)
-
-mesh.position.x = 0.7
-mesh.position.y = - 0.6
-mesh.position.z = 1
-
-scene.add(group)
-
-//Scale
-mesh.scale.set(0.5, 1, 0.5)
-
-//Rotation
-mesh.rotation.x = Math.PI
-mesh.rotation.y = Math.PI
-
-
-
-// Axes helper
-const axesHelprer = new THREE.AxesHelper(4);
-scene.add(axesHelprer);
-
-// Sizes
-const sizes = {
-    width: 800,
-    height: 600
-}
-
-// Camera
-const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height)
-camera.position.z = 3
-scene.add(camera)
-
-camera.lookAt(group.position)
+/**
+ * Base
+ */
+// Debug
+const gui = new dat.GUI();
 
 // Canvas
-const canvas = document.querySelector('canvas.webgl')
+const canvas = document.querySelector("canvas.webgl");
 
-// Controls
-const controls = new OrbitControls(camera, canvas)
-controls.enableDamping = true;
-// Renderer
-const renderer = new THREE.WebGLRenderer({
-    canvas: canvas
-})
-renderer.setSize(sizes.width, sizes.height)
+// Scene
+const scene = new THREE.Scene();
 
-controls.update()
-renderer.render(scene, camera)
+/**
+ * Lights
+ */
+// Ambient light
+const ambientLight = new THREE.AmbientLight();
+ambientLight.color = new THREE.Color(0xffffff);
+ambientLight.intensity = 0.5;
+scene.add(ambientLight);
 
+// Directional light
+const directionalLight = new THREE.DirectionalLight(0x00fffc, 0.3);
+directionalLight.position.set(1, 0.25, 0);
+scene.add(directionalLight);
 
-// Animate
+// Hemisphere light
+const hemisphereLight = new THREE.HemisphereLight(0xff0000, 0x0000ff, 0.3);
+scene.add(hemisphereLight);
 
-let time = Date.now();
- const tick = () =>
- {
-    const currentTime = Date.now()
-    const deltaTime = currentTime - time
-    time = currentTime
+// Point light
+const pointLight = new THREE.PointLight(0xff9000, 0.5, 10, 2);
+pointLight.position.set(1, -0.5, 1);
+scene.add(pointLight);
 
-    //group.rotation.y += 0.001 * deltaTime;
+// Rect area light
+const rectAreaLight = new THREE.RectAreaLight(0x4e00ff, 2, 1, 1);
+rectAreaLight.position.set(-1.5, 0, 1.5);
+rectAreaLight.lookAt(new THREE.Vector3());
+scene.add(rectAreaLight);
+
+// Spot light
+const spotLight = new THREE.SpotLight(
+    0x78ff00,
+    0.5,
+    10,
+    Math.PI * 0.1,
+    0.25,
+    1
+);
+spotLight.position.set(0, 2, 3);
+scene.add(spotLight);
+
+spotLight.target.position.x = -0.75;
+scene.add(spotLight.target);
+
+// Helpers
+const hemisphereLightHelper = new THREE.HemisphereLightHelper(
+    hemisphereLight,
+    0.2
+);
+scene.add(hemisphereLightHelper);
+
+const directionalLightHelper = new THREE.DirectionalLightHelper(
+    directionalLight,
+    0.2
+);
+scene.add(directionalLightHelper);
+
+const pointLightHelper = new THREE.PointLightHelper(pointLight, 0.2);
+scene.add(pointLightHelper);
+
+const spotLightHelper = new THREE.SpotLightHelper(spotLight);
+scene.add(spotLightHelper);
+window.requestAnimationFrame(() => {
+    spotLightHelper.update();
+});
+
+const rectAreaLightHelper = new RectAreaLightHelper(rectAreaLight);
+scene.add(rectAreaLightHelper);
+
+/**
+ * Objects
+ */
+// Material
+const material = new THREE.MeshStandardMaterial();
+material.roughness = 0.4;
+
+// Objects
+const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.5, 32, 32), material);
+sphere.position.x = -1.5;
+
+const cube = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.75, 0.75), material);
+
+const torus = new THREE.Mesh(
+    new THREE.TorusGeometry(0.3, 0.2, 32, 64),
+    material
+);
+torus.position.x = 1.5;
+
+const plane = new THREE.Mesh(new THREE.PlaneGeometry(5, 5), material);
+plane.rotation.x = -Math.PI * 0.5;
+plane.position.y = -0.65;
+
+scene.add(sphere, cube, torus, plane);
+
+/**
+ * Sizes
+ */
+const sizes = {
+    width: window.innerWidth,
+    height: window.innerHeight,
+};
+
+window.addEventListener("resize", () => {
+    // Update sizes
+    sizes.width = window.innerWidth;
+    sizes.height = window.innerHeight;
 
     // Update camera
-    //camera.position.x = Math.sin(cursor.x * Math.PI *2) * 3
-    //camera.position.z = Math.cos(cursor.x * Math.PI *2) * 3 
-    //camera.position.y = cursor.y * 5
+    camera.aspect = sizes.width / sizes.height;
+    camera.updateProjectionMatrix();
 
-    //camera.lookAt(group.position)
+    // Update renderer
+    renderer.setSize(sizes.width, sizes.height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+});
 
-    renderer.render(scene, camera)
-    window.requestAnimationFrame(tick)
- }
- 
- tick()
+/**
+ * Camera
+ */
+// Base camera
+const camera = new THREE.PerspectiveCamera(
+    75,
+    sizes.width / sizes.height,
+    0.1,
+    100
+);
+camera.position.x = 1;
+camera.position.y = 1;
+camera.position.z = 2;
+scene.add(camera);
+
+// Controls
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+
+/**
+ * Renderer
+ */
+const renderer = new THREE.WebGLRenderer({
+    canvas: canvas,
+});
+renderer.setSize(sizes.width, sizes.height);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+/**
+ * Animate
+ */
+const clock = new THREE.Clock();
+
+const tick = () => {
+    const elapsedTime = clock.getElapsedTime();
+
+    // Update objects
+    sphere.rotation.y = 0.1 * elapsedTime;
+    cube.rotation.y = 0.1 * elapsedTime;
+    torus.rotation.y = 0.1 * elapsedTime;
+
+    sphere.rotation.x = 0.15 * elapsedTime;
+    cube.rotation.x = 0.15 * elapsedTime;
+    torus.rotation.x = 0.15 * elapsedTime;
+
+    // Update controls
+    controls.update();
+
+    // Render
+    renderer.render(scene, camera);
+
+    // Call tick again on the next frame
+    window.requestAnimationFrame(tick);
+};
+
+tick();
